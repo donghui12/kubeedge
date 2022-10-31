@@ -82,7 +82,7 @@ var DefaultRunLiteKubelet RunLiteKubelet = kubeletserver.Run
 // edged is the main edged implementation.
 type edged struct {
 	enable      bool
-	KuberServer *kubeletoptions.KubeletServer
+	KubeServer  *kubeletoptions.KubeletServer
 	KubeletDeps *kubelet.Dependencies
 	FeatureGate featuregate.FeatureGate
 	context     context.Context
@@ -120,9 +120,9 @@ func (e *edged) Start() {
 	klog.Info("Starting edged...")
 
 	go func() {
-		err := DefaultRunLiteKubelet(e.context, e.KuberServer, e.KubeletDeps, e.FeatureGate)
+		err := DefaultRunLiteKubelet(e.context, e.KubeServer, e.KubeletDeps, e.FeatureGate)
 		if err != nil {
-			klog.Errorf("Start edged failed, err: %v", err)
+			klog.Errorf("start edged failed, err: %v", err)
 			os.Exit(1)
 		}
 	}()
@@ -145,7 +145,7 @@ func newEdged(enable bool, nodeName, namespace string) (*edged, error) {
 	var kubeFlags kubeletoptions.KubeletFlags
 	err = kubeletconfigv1beta1.Convert_v1beta1_KubeletConfiguration_To_config_KubeletConfiguration(edgedconfig.Config.TailoredKubeletConfig, &kubeConfig, nil)
 	if err != nil {
-		klog.ErrorS(err, "Failed to convert kueblet config")
+		klog.ErrorS(err, "Failed to convert kubelet config")
 		return nil, fmt.Errorf("failed to construct kubelet dependencies")
 	}
 	edgedconfig.ConvertConfigEdgedFlagToConfigKubeletFlag(&edgedconfig.Config.TailoredKubeletFlag, &kubeFlags)
@@ -168,7 +168,7 @@ func newEdged(enable bool, nodeName, namespace string) (*edged, error) {
 	ed = &edged{
 		enable:      true,
 		context:     context.Background(),
-		KuberServer: &kubeletServer,
+		KubeServer:  &kubeletServer,
 		KubeletDeps: kubeletDeps,
 		FeatureGate: utilfeature.DefaultFeatureGate,
 		nodeName:    nodeName,
@@ -405,7 +405,7 @@ func (e *edged) controllerPublishVolume(content []byte) (interface{}, error) {
 		klog.Errorf("controller publish volume error: %v", err)
 		return nil, err
 	}
-	klog.V(4).Infof("end controller publish volume:: %s result: %v", req.VolumeId, res)
+	klog.V(4).Infof("end controller publish volume: %s result: %v", req.VolumeId, res)
 	return res, nil
 }
 
@@ -423,7 +423,7 @@ func (e *edged) controllerUnpublishVolume(content []byte) (interface{}, error) {
 		klog.Errorf("controller unpublish volume error: %v", err)
 		return nil, err
 	}
-	klog.V(4).Infof("end controller unpublish volume:: %s result: %v", req.VolumeId, res)
+	klog.V(4).Infof("end controller unpublish volume: %s result: %v", req.VolumeId, res)
 	return res, nil
 }
 
